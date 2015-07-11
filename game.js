@@ -39,15 +39,25 @@ function Game(lvlnum) {
 
 
 	// Move the player to a given point
-	function move(y, x) {
+	function move(dy, dx) {
+		var y = player[0] + dy;
+		var x = player[1] + dx;
 
-		// Safe if nothing is in the way
-		var safe = (state[y][x] == ' ' || state[y][x] == '!')
-		           && (!holding || state[y-1][x] == ' ');
+		// Safe to move if nothing is in the way
+		var safe = (
+			state[y][x] == ' '
+			|| state[y][x] == '!'
+		) && (
+			!holding
+			|| state[y-1][x] == ' '
+			|| state[y-1][x] == '>'
+			|| state[y-1][x] == '<'
+		);
 
 		// Win if moving into the '!'
 		var win = state[y][x] == '!';
 
+		// Do the move
 		if (safe) {
 			swap(player[0], player[1], y, x);
 			if (holding) swap(player[0]-1, player[1], y-1, x);
@@ -55,25 +65,23 @@ function Game(lvlnum) {
 			player = [y, x];
 		}
 
-		y = player[0];
-		x = player[1];
-		if (state[y][x] != ' ') {
-			player = fall(y, x);
-		}
-		if (holding) {
-			fall(y-1, x);
-		}
-
+		// Load the next level upon winning
 		if (win) {
 			lvlnum++;
 			load();
+			return this;
+		}
+
+		// Apply gravity to the player
+		if (safe && state[y+1][x] == ' ' || state[y+1][x] == '!') {
+			return move(1, 0);
 		}
 
 		return this;
 	}
 
 
-	// Apply gravity to a point
+	// Apply gravity to any point
 	function fall(y, x) {
 		if (state[y+1][x] == ' ') {
 			swap(y, x, y+1, x);
@@ -118,7 +126,7 @@ function Game(lvlnum) {
 
 	// Move the player to the left
 	this.left = function () {
-		move(player[0], player[1] - 1);
+		move(0, -1);
 		state[player[0]][player[1]] = '<';
 		return this;
 	}
@@ -126,7 +134,7 @@ function Game(lvlnum) {
 
 	// Move the player to the right
 	this.right = function () {
-		move(player[0], player[1] + 1);
+		move(0, +1);
 		state[player[0]][player[1]] = '>';
 		return this;
 	}
@@ -139,7 +147,7 @@ function Game(lvlnum) {
 		var dir = state[y][x];
 		var dx = (dir == '<') ? -1 : +1;
 		if (state[y][x+dx] != ' ' && state[y-1][x] != 'x') {
-			return move(y-1, x+dx);
+			return move(-1, +dx);
 		} else {
 			return this
 		}
