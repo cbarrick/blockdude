@@ -232,7 +232,7 @@ function Renderer(game, canvas) {
 	canvas.width = RESOLUTION;
 	canvas.height = RESOLUTION >> 1;
 
-	var ctx = canvas.getContext('2d', {alpha: false});
+	var ctx = canvas.getContext('2d', {alpha: true});
 	var viewport = [0, 0];
 
 	var rendermap = {
